@@ -31,7 +31,6 @@ namespace FinalBlog.App
             builder.Services.AddAutoMapper(assembly);
 
             builder.Services.AddIdentity<User, Role>(cfg => {
-                //��������
                 cfg.Password.RequiredLength = 8;
                 cfg.Password.RequireNonAlphanumeric = false;
                 cfg.Password.RequireUppercase = false;

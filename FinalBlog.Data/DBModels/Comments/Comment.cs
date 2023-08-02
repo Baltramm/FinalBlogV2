@@ -17,7 +17,7 @@ namespace FinalBlog.Data.DBModels.Comments
 
         public Comment()
         {
-            CreatedDate = DateTime.Now;
+            CreatedDate = DateTime.UtcNow;
         }
     }
 }

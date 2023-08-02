@@ -19,7 +19,7 @@ namespace FinalBlog.Data.DBModels.Posts
 
         public Post()
         {
-            CreatedDate = DateTime.Now;
+            CreatedDate = DateTime.UtcNow;
         }
     }
 }
