@@ -1,12 +1,9 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
-
-// Write your JavaScript code.
-
+﻿/** Получение значения инпута фильтрации тегов */
 function getFilterInputValue() {
     return document.getElementById('filter-input').value.toLowerCase();
 }
 
+/** Фильтрация тегов */
 function filter() {
     const items = document.querySelectorAll('#tags option');
 
@@ -21,6 +18,7 @@ function filter() {
     })
 }
 
+/** Добавление элемента тега */
 function addTag() {
     const select = document.getElementById('tags');
     const view = document.getElementById('add-tags');
@@ -40,6 +38,7 @@ function addTag() {
     }
 }
 
+/** Отображение добавляемых тегов к статье */
 function changeViewTags(el, cont) {
     const input = document.getElementById(el);
     const container = document.getElementById(cont);
@@ -50,6 +49,7 @@ function changeViewTags(el, cont) {
     }
 }
 
+/** Создание нового элемента тега, добавление его в контейнер */
 function createTag(text, container) {
     const newItem = document.createElement('div');
     newItem.classList.add('badge', 'tag-badge');
@@ -58,6 +58,7 @@ function createTag(text, container) {
     container.insertAdjacentElement('beforeEnd', newItem);
 }
 
+/** Удаление элемента тега */
 function deleteTag(elem) {
     const field = document.getElementById('post-tags');
     const view = document.getElementById('add-tags');
@@ -70,15 +71,22 @@ function deleteTag(elem) {
     if (tags.length === 1 && tags[0] === '') view.innerText = 'Здесь вы увидите добавленные теги';
 }
 
-
+/** Сохранение положения прокрутки страницы в локальном хранилище */
 function setScrollPos() {
     localStorage.setItem('y-pos', window.pageYOffset);
 }
 
+/** Прокрутка страницы до указанного значения в локальном хранилище */
 function getScrollPos() {
     const pos = localStorage.getItem('y-pos');
     if (pos !== null) {
         window.scrollTo({ left: 0, top: pos, behavior: "instant" });
         localStorage.removeItem('y-pos');
     }
+}
+
+/** Сброс значения поля даты */
+function resetDataInDateInput() {
+    const input = document.querySelector('input[type=date]');
+    input.value = '';
 }

@@ -8,6 +8,8 @@ using FinalBlog.Data.DBModels.Users;
 using FinalBlog.Data.Repositories;
 using System.Reflection;
 using FinalBlog.Data.DBModels.Roles;
+using FinalBlog.Services;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace FinalBlog.App
 {
@@ -25,12 +27,14 @@ namespace FinalBlog.App
                 .AddCustomRepository<Post, PostRepository>()
                 .AddCustomRepository<Comment, CommentRepository>()
                 .AddCustomRepository<Tag, TagRepository>()
-                .AddAppServices();
+                .AddAppServices()
+                .AddControllerModules();
 
             var assembly = Assembly.GetAssembly(typeof(MapperProfile));
             builder.Services.AddAutoMapper(assembly);
 
-            builder.Services.AddIdentity<User, Role>(cfg => {
+            builder.Services.AddIdentity<User, Role>(cfg =>
+            {
                 cfg.Password.RequiredLength = 8;
                 cfg.Password.RequireNonAlphanumeric = false;
                 cfg.Password.RequireUppercase = false;
@@ -48,9 +52,8 @@ namespace FinalBlog.App
 
             var app = builder.Build();
 
-            if (!app.Environment.IsDevelopment())
-                app.UseExceptionHandler("/Home/Error");
-
+            app.UseCustomExceptionHandler();
+            app.UseFollowLogging();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -64,6 +67,12 @@ namespace FinalBlog.App
 
                 else if (response.StatusCode == 404)
                     response.Redirect("/NotFound");
+
+                else if (response.StatusCode == 401)
+                {
+                    var returnUrl = statusCodeContext.HttpContext.Request.GetEncodedPathAndQuery().Replace("/", "%2F");
+                    response.Redirect($"/Login?ReturnUrl={returnUrl}");
+                }
             });
 
             app.UseRouting();

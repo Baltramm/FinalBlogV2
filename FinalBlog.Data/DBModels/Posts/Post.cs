@@ -16,6 +16,7 @@ namespace FinalBlog.Data.DBModels.Posts
 
         public List<Tag> Tags { get; set; }
         public List<Comment> Comments { get; set; }
+        public List<User> Users { get; set; }
 
         public Post()
         {

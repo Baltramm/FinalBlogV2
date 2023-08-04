@@ -1,26 +1,30 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using FinalBlog.App.Utils.Services.Interfaces;
-using FinalBlog.App.ViewModels.Roles;
+using FinalBlog.App.Utils.Attributes;
+using FinalBlog.App.Utils.Modules.Interfaces;
+using FinalBlog.Services.Services.Interfaces;
+using FinalBlog.Services.ViewModels.Roles.Response;
 
 namespace FinalBlog.App.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin"), CheckUserId]
     public class RoleController : Controller
     {
         private readonly IRoleService _roleService;
+        private readonly IRoleControllerModule _module;
 
-        public RoleController(IRoleService roleService)
+        public RoleController(IRoleService roleService, IRoleControllerModule module)
         {
             _roleService = roleService;
+            _module = module;
         }
 
         [HttpGet]
         [Route("GetRoles/{userId?}")]
-        public async Task<IActionResult> GetRoles([FromRoute]int? userId)
+        public async Task<IActionResult> GetRoles([FromRoute] int? userId)
         {
             var model = await _roleService.GetRolesViewModelAsync(userId);
-            if(model == null)
+            if (model == null)
                 return BadRequest();
 
             return View(model);
@@ -34,7 +38,7 @@ namespace FinalBlog.App.Controllers
         [Route("CreateRole")]
         public async Task<IActionResult> Create(RoleCreateViewModel model)
         {
-            _ = await _roleService.CheckDataForCreateTagAsync(this, model);
+            _ = await _module.CheckDataForCreateAsync(this, model);
             if (ModelState.IsValid)
             {
                 var result = await _roleService.CreateRoleAsync(model);
@@ -62,11 +66,11 @@ namespace FinalBlog.App.Controllers
         [Route("EditRole")]
         public async Task<IActionResult> Edit(RoleEditViewModel model)
         {
-            var currentRole = await _roleService.CheckDataAtEditAsync(this, model);
+            var currentRole = await _module.CheckDataAtEditAsync(this, model);
             if (ModelState.IsValid)
             {
                 var result = await _roleService.UpdateRoleAsync(currentRole!, model);
-                if(!result) 
+                if (!result)
                     return BadRequest();
 
                 return RedirectToAction("GetRoles");
@@ -79,7 +83,7 @@ namespace FinalBlog.App.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _roleService.DeleteRoleAsync(id);
-            if(!result)
+            if (!result)
                 return BadRequest();
 
             return RedirectToAction("GetRoles");
@@ -90,7 +94,7 @@ namespace FinalBlog.App.Controllers
         public async Task<IActionResult> View([FromRoute] int id)
         {
             var model = await _roleService.GetRoleViewModel(id);
-            if(model == null)
+            if (model == null)
                 return BadRequest();
 
             return View(model);

@@ -1,22 +1,19 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FinalBlog.App.Utils.Attributes;
-using FinalBlog.App.Utils.Services.Interfaces;
-using FinalBlog.App.ViewModels.Comments;
+using FinalBlog.Services.Services.Interfaces;
+using FinalBlog.Services.ViewModels.Comments.Response;
 
 namespace FinalBlog.App.Controllers
 {
-    [Authorize]
+    [Authorize, CheckUserId]
     public class CommentController : Controller
     {
         private readonly ICommentService _commentService;
-        private readonly IPostService _postService;
 
-        public CommentController(ICommentService commentService, IPostService postService)
+        public CommentController(ICommentService commentService)
         {
             _commentService = commentService;
-            _postService = postService;
-
         }
 
         [HttpPost]
@@ -27,7 +24,8 @@ namespace FinalBlog.App.Controllers
             if (!result)
                 return BadRequest();
 
-            return RedirectToAction("View", "Post", new { Id = model.PostId });
+            return RedirectToAction("View", "Post",
+                new { Id = model.PostId, UserId = User.Claims.FirstOrDefault(c => c.Type == "UserID")?.Value });
         }
 
         [Authorize(Roles = "Admin, Moderator")]
@@ -35,14 +33,13 @@ namespace FinalBlog.App.Controllers
         [Route("GetComments/{postId?}")]
         public async Task<IActionResult> GetComments([FromRoute] int? postId, [FromQuery] int? userId)
         {
-            if(postId != null && await _postService.GetPostByIdAsync((int)postId) == null)
+            var model = await _commentService.GetCommentsViewModelAsync(postId, userId);
+            if (model == null)
                 return BadRequest();
 
-            var model = await _commentService.GetCommentsViewModelAsync(postId, userId);
-                return View(model);
+            return View(model);
         }
 
-        [CheckParameter(parameterName: "userId", path: "Comment/Edit")]
         [HttpGet]
         public async Task<IActionResult> Edit([FromRoute] int id, [FromQuery] int? userId)
         {
@@ -59,7 +56,7 @@ namespace FinalBlog.App.Controllers
         public async Task<IActionResult> Edit(CommentEditViewModel model)
         {
             var result = await _commentService.UpdateCommentAsync(model);
-            if(!result)
+            if (!result)
                 return BadRequest();
 
             if (model.ReturnUrl != null && Url.IsLocalUrl(model.ReturnUrl))
@@ -72,11 +69,11 @@ namespace FinalBlog.App.Controllers
         {
             var access = User.IsInRole("Admin") || User.IsInRole("Moderator");
             var result = await _commentService.DeleteCommentAsync(id, userId, access);
-            if(!result)
+            if (!result)
                 return BadRequest();
 
             if (returnUrl != null && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
+                return Redirect(returnUrl + $"?userId={userId}");
             return RedirectToAction("GetComments");
         }
     }

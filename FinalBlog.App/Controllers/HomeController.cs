@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using FinalBlog.App.ViewModels;
+using FinalBlog.Services.ViewModels;
 using System.Diagnostics;
 
 namespace FinalBlog.App.Controllers
 {
     public class HomeController : Controller
     {
+
+
         public IActionResult Index(string? returnUrl)
         {
             if (User.Identity!.IsAuthenticated)

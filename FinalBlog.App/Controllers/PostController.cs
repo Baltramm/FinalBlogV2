@@ -1,23 +1,26 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FinalBlog.App.Utils.Attributes;
-using FinalBlog.App.Utils.Services.Interfaces;
-using FinalBlog.App.ViewModels.Posts;
+using FinalBlog.App.Utils.Modules.Interfaces;
+using FinalBlog.Services.Services.Interfaces;
+using FinalBlog.Services.ViewModels.Posts.Response;
 
 namespace FinalBlog.App.Controllers
 {
-    [Authorize]
+    [Authorize, CheckUserId]
     public class PostController : Controller
     {
         private readonly IPostService _postService;
         private readonly ITagService _tagService;
         private readonly ICommentService _commentService;
+        private readonly IPostControllerModule _module;
 
-        public PostController(IPostService postService, ITagService tagService, ICommentService commentService)
+        public PostController(IPostService postService, ITagService tagService, ICommentService commentService, IPostControllerModule module)
         {
             _postService = postService;
             _tagService = tagService;
             _commentService = commentService;
+            _module = module;
         }
 
         [HttpGet]
@@ -32,22 +35,22 @@ namespace FinalBlog.App.Controllers
         [Route("CreatePost")]
         public async Task<IActionResult> Create(PostCreateViewModel model)
         {
-            var tags = await _tagService.CreateTagForPostAsync(model.PostTags);
+            var tags = await _tagService.SetTagsForPostAsync(model.PostTags);
 
             var result = await _postService.CreatePostAsync(model, tags);
             if (!result)
             {
-                ModelState.AddModelError(string.Empty, "Ошибка! Не удалось создать статью!");
+                ModelState.AddModelError(string.Empty, "Не удалось создать статью!");
                 return View(model);
             }
-            return RedirectToAction("GetPosts");
+            return RedirectToAction("View", new { Id = await _postService.GetLastCreatePostIdByUserId(model.UserId), model.UserId });
         }
 
         [HttpGet]
-        [Route("GetPosts")]
-        public async Task<IActionResult> GetPosts([FromQuery] int? userId)
+        [Route("GetPosts/{tagId?}")]
+        public async Task<IActionResult> GetPosts([FromRoute] int? tagId, [FromQuery] int? userId)
         {
-            var model = await _postService.GetPostsViewModelAsync(userId);
+            var model = await _postService.GetPostsViewModelAsync(tagId, userId);
             return View(model);
         }
 
@@ -62,7 +65,6 @@ namespace FinalBlog.App.Controllers
             return RedirectToAction("GetPosts");
         }
 
-        [CheckParameter(parameterName: "userId", path: "Post/Edit")]
         [HttpGet]
         public async Task<IActionResult> Edit([FromRoute] int id, [FromQuery] int? userId)
         {
@@ -79,7 +81,7 @@ namespace FinalBlog.App.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(PostEditViewModel model)
         {
-            var currentPost = await _postService.CheckDataAtUpdatePostAsync(this, model);
+            var currentPost = await _module.CheckDataAtUpdateAsync(this, model);
             if (ModelState.IsValid)
             {
                 var result = await _postService.UpdatePostAsync(model, currentPost!);
@@ -97,10 +99,10 @@ namespace FinalBlog.App.Controllers
 
         [HttpGet]
         [Route("ViewPost/{id}")]
-        public async Task<IActionResult> View([FromRoute] int id)
+        public async Task<IActionResult> View([FromRoute] int id, [FromQuery] string userId)
         {
-            var model = await _postService.GetPostViewModelAsync(id);
-            if(model == null)
+            var model = await _postService.GetPostViewModelAsync(id, userId);
+            if (model == null)
                 return BadRequest();
 
             model.Comments = await _commentService.GetAllCommentsByPostIdAsync(id);

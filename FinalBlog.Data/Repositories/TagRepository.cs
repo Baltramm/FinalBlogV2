@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using FinalBlog.Data.DBModels.Posts;
 using FinalBlog.Data.DBModels.Tags;
-using FinalBlog.Data.DBModels.Users;
 
 namespace FinalBlog.Data.Repositories
 {
@@ -12,10 +10,10 @@ namespace FinalBlog.Data.Repositories
         public async override Task<List<Tag>> GetAllAsync() =>
             await Set.Include(t => t.Posts).ToListAsync();
 
-        public override async Task<Tag?> GetAsync(int id) => 
+        public override async Task<Tag?> GetAsync(int id) =>
             await Set.Include(t => t.Posts).FirstOrDefaultAsync(t => t.Id == id);
 
-        public async Task<Tag?> GetTagByNameAsync(string name) => 
+        public async Task<Tag?> GetTagByNameAsync(string name) =>
             await Set.Include(t => t.Posts).FirstOrDefaultAsync(t => t.Name == name);
 
         public async Task<List<Tag>> GetTagsByPostIdAsync(int postId) =>

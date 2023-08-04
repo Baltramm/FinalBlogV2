@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using FinalBlog.Data.DBModels.Posts;
-using FinalBlog.Data.DBModels.Users;
 
 namespace FinalBlog.Data.Repositories
 {
@@ -8,15 +7,24 @@ namespace FinalBlog.Data.Repositories
     {
         public PostRepository(FinalBlogContext context) : base(context) { }
 
-        public async override Task<List<Post>> GetAllAsync() => 
-            await Set.Include(p => p.Tags).Include(p => p.Comments).ToListAsync();
+        public async override Task<List<Post>> GetAllAsync() =>
+            await Set.Include(p => p.Tags).Include(p => p.Comments).Include(p => p.Users).ToListAsync();
 
-        public async override Task<Post?> GetAsync(int id) => 
-            await Set.Include(p => p.Tags).Include(p => p.Comments).Include(p => p.User)
+        public async override Task<Post?> GetAsync(int id) =>
+            await Set.Include(p => p.Tags).Include(p => p.Comments).Include(p => p.User).Include(p => p.Users)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
         public async Task<List<Post>> GetPostsByUserIdAsync(int userId) =>
-            await Set.Include(p => p.Tags).Include(p => p.Comments)
+            await Set.Include(p => p.Users).Include(p => p.Tags).Include(p => p.Comments)
                 .Where(p => p.UserId == userId).ToListAsync();
+
+        public async Task<List<Post>> GetPostsByTagIdAsync(int tagId) =>
+            await Set.Include(p => p.Tags).Include(p => p.Users).Include(p => p.Comments)
+                .SelectMany(p => p.Tags, (p, t) => new { Post = p, TagId = t.Id })
+                .Where(o => o.TagId == tagId).Select(o => o.Post).ToListAsync();
+
+        public async Task<int> FindLastCreateIdByUserId(int userId) =>
+            await Set.Where(p => p.UserId == userId).Select(p => p.Id)
+            .OrderByDescending(id => id).FirstOrDefaultAsync();
     }
 }

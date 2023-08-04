@@ -1,17 +1,22 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using FinalBlog.App.Utils.Services.Interfaces;
-using FinalBlog.App.ViewModels.Tags;
+using FinalBlog.App.Utils.Attributes;
+using FinalBlog.App.Utils.Modules.Interfaces;
+using FinalBlog.Services.Services.Interfaces;
+using FinalBlog.Services.ViewModels.Tags.Response;
 
 namespace FinalBlog.App.Controllers
 {
+    [CheckUserId]
     public class TagController : Controller
     {
         private readonly ITagService _tagService;
+        private readonly ITagControllerModule _module;
 
-        public TagController(ITagService tagService)
+        public TagController(ITagService tagService, ITagControllerModule module)
         {
             _tagService = tagService;
+            _module = module;
         }
 
         [Authorize]
@@ -24,7 +29,7 @@ namespace FinalBlog.App.Controllers
         [Route("CreateTag")]
         public async Task<IActionResult> Create(TagCreateViewModel model)
         {
-            _ = await _tagService.CheckTagNameAsync(this, model);
+            _ = await _module.CheckTagNameAsync(this, model);
             if (ModelState.IsValid)
             {
                 var result = await _tagService.CreateTagAsync(model);
@@ -48,7 +53,7 @@ namespace FinalBlog.App.Controllers
 
         [Authorize(Roles = "Admin, Moderator")]
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit([FromRoute] int id)
         {
             var model = await _tagService.GetTagEditViewModelAsync(id);
             if (model == null)
@@ -61,11 +66,11 @@ namespace FinalBlog.App.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(TagEditViewModel model)
         {
-            _ = await _tagService.CheckTagNameAsync(this, model);
+            _ = await _module.CheckTagNameAsync(this, model);
             if (ModelState.IsValid)
             {
                 var result = await _tagService.UpdateTagAsync(model);
-                if (!result) 
+                if (!result)
                     return BadRequest();
 
                 return RedirectToAction("GetTags");
@@ -79,10 +84,21 @@ namespace FinalBlog.App.Controllers
         public async Task<IActionResult> Remove(int id)
         {
             var reselt = await _tagService.DeleteTagAsync(id);
-            if(!reselt)
+            if (!reselt)
                 return BadRequest();
 
             return RedirectToAction("GetTags");
+        }
+
+        [Authorize(Roles = "Admin, Moderator")]
+        [HttpGet]
+        public async Task<IActionResult> View([FromRoute] int id)
+        {
+            var model = await _tagService.GetTagViewModelAsync(id);
+            if (model == null)
+                return BadRequest();
+
+            return View(model);
         }
     }
 }

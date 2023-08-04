@@ -14,8 +14,7 @@ namespace FinalBlog.Data.Migrations
     [Migration("20230406150426_Init")]
     partial class Init
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+                protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");

@@ -1,6 +1,8 @@
-﻿@model FinalBlog.App.ViewModels.Users.UserEditViewModel
+﻿@model FinalBlog.Services.ViewModels.Users.Response.UserEditViewModel
 @{
     ViewData["Title"] = "Редактирование пользователя";
+
+    var returnUrl = Context.Request.Query["returnUrl"];
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
@@ -14,6 +16,7 @@
         <div asp-validation-summary="ModelOnly" class="text-danger fs-6"></div>
 
         <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ReturnUrl" value="@returnUrl" />
 
         @if (User.IsInRole("Admin"))
         {
@@ -24,12 +27,12 @@
                         <div class="form-check">
                             @if(role.Key == "User")
                             {
-                                <input type="hidden" name="User" value="on" />
+        <input type="hidden" name="User" value="on" />
                             }
                             <input class="form-check-input" type="checkbox" id="@role.Key" @(role.Key == "User" ? "disabled" : "")
-                                   name="@(role.Key != "User" ? $"{@role.Key}" : "")" @(role.Value ? "checked" : "") />
+           name="@(role.Key != "User" ? $"{@role.Key}" : "")" @(role.Value ? "checked" : "") />
                             <label class="from-check-label @(role.Key == "User" ? "text-secondary" : "")" for="@role.Key">
-                                @role.Key
+        @role.Key
                             </label>
                         </div>
                     </div>
@@ -80,7 +83,7 @@
 
         <div class="form-group mb-4 position-relative">
             <div class="row">
-                <label asp-for="BirthDate" class="form-label col-sm-3 col-form-label"></label>
+                <label asp-for="BirthDate" class="form-label col-sm-6 col-form-label"></label>
                 <div class="col-sm-6">
                     <input asp-for="BirthDate" type="date" class="form-control" />
                 </div>
@@ -107,6 +110,9 @@
         </div>
 
         <button type="submit" class="btn btn-primary mb-2">Сохранить</button>
-        <p class="form-text"><a asp-action="Index" asp-controller="Home" class="text-decoration-none">Выйти без сохранения</a></p>
+        <p class="form-text"><a asp-action="Index" asp-controller="Home" asp-route-returnUrl="@returnUrl"
+            class="text-decoration-none">
+            Выйти без сохранения
+        </a></p>
     </form>
 </div>

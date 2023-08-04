@@ -1,6 +1,7 @@
-﻿@model FinalBlog.App.ViewModels.Posts.PostsViewModel
+﻿@model FinalBlog.Services.ViewModels.Posts.Request.PostsViewModel
 @{
     ViewData["Title"] = "Список статей";
+
     var checkRole = User.IsInRole("Admin") || User.IsInRole("Moderator");
     var claimUserId = User.Claims.FirstOrDefault(c => c.Type == "UserID")?.Value;
 
@@ -17,14 +18,17 @@
     {
         <div class="card m-3 col-10">
             <div class="card-body">
-                <a class="fs-5 mb-0 link-primary text-decoration-none" asp-action="View" 
-                    asp-controller="Post" asp-route-id="@post.Id">
+                <a class="fs-5 mb-0 link-primary text-decoration-none" asp-action="View"
+               asp-controller="Post" asp-route-id="@post.Id" asp-route-userId="@claimUserId">
                     @post.Title
                 </a>
                 <div class="mb-4">
                     @foreach (var tag in post.Tags)
                     {
-                        <span class="badge bg-primary">@tag.Name</span>
+                        <span class="badge tag-badge" onclick="document.getElementById('@(tag.Id)').submit()">
+                            @tag.Name
+                        </span>
+                        <form class="d-none" id="@tag.Id" method="get" asp-action="GetPosts" asp-controller="Post" asp-route-tagId="@tag.Id"></form>
                     }
                 </div>
                 <div class="row">
@@ -33,16 +37,16 @@
                         <div class="col-sm-8" >
                             <form method="post" asp-action="Remove" asp-controller="Post" asp-route-id="@post.Id" >
                             <input type="hidden" name="userId" value="@claimUserId" />
-                                <div class="btn-group">
-                                    <a class="btn btn-outline-success btn-sm" asp-action="Edit" asp-controller="Post" asp-route-id="@post.Id">
-                                        Редактировать
-                                    </a>
-                                    <button type="submit" class="btn btn-outline-danger btn-sm">Удалить</button>
-                                </div>
+        <div class="btn-group">
+            <a class="btn btn-outline-success btn-sm" asp-action="Edit" asp-controller="Post" asp-route-id="@post.Id" asp-route-userId="@claimUserId">
+                Редактировать
+            </a>
+            <button type="submit" class="btn btn-outline-danger btn-sm">Удалить</button>
+        </div>
                             </form>
                         </div>
                     }
-                    <p class="@labelClasses">Просмотров: 0</p>
+                    <p class="@labelClasses">Просмотров: @post.Users.Count</p>
                 </div>
             </div>
         </div>

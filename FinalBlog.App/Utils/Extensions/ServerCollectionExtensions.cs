@@ -1,7 +1,9 @@
-﻿using FinalBlog.App.Utils.Services;
-using FinalBlog.App.Utils.Services.Interfaces;
+﻿using FinalBlog.App.Utils.Modules;
+using FinalBlog.App.Utils.Modules.Interfaces;
 using FinalBlog.Data.Repositories;
 using FinalBlog.Data.Repositories.Interfaces;
+using FinalBlog.Services.Services;
+using FinalBlog.Services.Services.Interfaces;
 
 namespace FinalBlog.App.Utils.Extensions
 {
@@ -25,7 +27,17 @@ namespace FinalBlog.App.Utils.Extensions
             return services;
         }
 
-        public static IServiceCollection AddCustomRepository<TEntity, TRepoitory>(this IServiceCollection services) 
+        public static IServiceCollection AddControllerModules(this IServiceCollection services)
+        {
+            services.AddScoped<IUserControllerModule, UserControllerModule>();
+            services.AddScoped<IRoleControllerModule, RoleControllerModule>();
+            services.AddScoped<IPostControllerModule, PostControllerModule>();
+            services.AddScoped<ITagControllerModule, TagControllerModule>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddCustomRepository<TEntity, TRepoitory>(this IServiceCollection services)
             where TEntity : class
             where TRepoitory : Repository<TEntity>
         {

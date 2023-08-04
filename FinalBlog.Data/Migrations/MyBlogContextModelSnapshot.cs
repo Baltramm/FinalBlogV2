@@ -349,6 +349,21 @@ namespace FinalBlog.Data.Migrations
                     b.ToTable("RoleUser");
                 });
 
+            modelBuilder.Entity("UserToVisitedPost", b =>
+                {
+                    b.Property<int>("UsersId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("VisitedPostsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("UsersId", "VisitedPostsId");
+
+                    b.HasIndex("VisitedPostsId");
+
+                    b.ToTable("UserToVisitedPost");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("FinalBlog.Data.DBModels.Roles.Role", null)
@@ -456,6 +471,21 @@ namespace FinalBlog.Data.Migrations
                     b.HasOne("FinalBlog.Data.DBModels.Users.User", null)
                         .WithMany()
                         .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("UserToVisitedPost", b =>
+                {
+                    b.HasOne("FinalBlog.Data.DBModels.Users.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FinalBlog.Data.DBModels.Posts.Post", null)
+                        .WithMany()
+                        .HasForeignKey("VisitedPostsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

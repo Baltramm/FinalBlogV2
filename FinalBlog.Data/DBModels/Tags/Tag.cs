@@ -1,5 +1,4 @@
 ﻿using FinalBlog.Data.DBModels.Posts;
-using FinalBlog.Data.DBModels.Users;
 
 namespace FinalBlog.Data.DBModels.Tags
 {
@@ -12,7 +11,7 @@ namespace FinalBlog.Data.DBModels.Tags
 
         public Tag() { }
 
-        public Tag(string name) 
+        public Tag(string name)
         {
             Name = name;
         }

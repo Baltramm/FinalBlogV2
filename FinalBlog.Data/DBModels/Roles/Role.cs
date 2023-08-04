@@ -8,7 +8,7 @@ namespace FinalBlog.Data.DBModels.Roles
         public List<User> Users { get; set; }
         public string? Description { get; set; }
 
-        public Role(string name) : base(name) 
+        public Role(string name) : base(name)
         {
             NormalizedName = name.ToUpper();
         }
