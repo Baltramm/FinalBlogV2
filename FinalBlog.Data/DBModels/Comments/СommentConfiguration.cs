@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace FinalBlog.Data.DBModels.Comments
 {
+    /// <summary>
+    /// Конфигурации для таблицы комментариев
+    /// </summary>
     public class СommentConfiguration : IEntityTypeConfiguration<Comment>
     {
         public void Configure(EntityTypeBuilder<Comment> builder)

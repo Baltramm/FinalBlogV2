@@ -1,12 +1,8 @@
-﻿@model FinalBlog.Services.ViewModels.Comments.Response.CommentEditViewModel
+﻿@model FinalBlog.Services.ViewModels.Comments.Request.CommentEditViewModel
 @{
     ViewData["Title"] = "Редактирование комментария";
 
-    var path = Context.Request.Query["returnUrl"];
-    var query = path.ToString().Contains("GetComment")
-        ? ""
-        : "?userId=" + Context.Request.Query["userId"];
-    var returnUrl = path + query;
+    var returnUrl = Context.Request.Query["returnUrl"];
 }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
@@ -20,7 +16,6 @@
         <hr class="hr" />
         <div asp-validation-summary="ModelOnly" class="text-danger fs-6"></div>
 
-        <input type="hidden" asp-for="UserId" value="@Model.UserId" />
         <input type="hidden" asp-for="ReturnUrl" value="@returnUrl" />
 
         <div class="form-group mb-4 position-relative">

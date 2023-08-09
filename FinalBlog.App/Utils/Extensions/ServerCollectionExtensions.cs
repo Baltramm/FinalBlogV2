@@ -1,14 +1,18 @@
-﻿using FinalBlog.App.Utils.Modules;
-using FinalBlog.App.Utils.Modules.Interfaces;
-using FinalBlog.Data.Repositories;
+﻿using FinalBlog.Data.Repositories;
 using FinalBlog.Data.Repositories.Interfaces;
 using FinalBlog.Services.Services;
 using FinalBlog.Services.Services.Interfaces;
 
 namespace FinalBlog.App.Utils.Extensions
 {
+    /// <summary>
+    /// Расширения для сервисов приложения
+    /// </summary>
     public static class ServerCollectionExtensions
     {
+        /// <summary>
+        /// Добавление UnitOfWork в сервисы
+        /// </summary>
         public static IServiceCollection AddUnitOfWork(this IServiceCollection services)
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -16,6 +20,9 @@ namespace FinalBlog.App.Utils.Extensions
             return services;
         }
 
+        /// <summary>
+        /// Добавление сервисов бизнес-логики в сервисы приложения
+        /// </summary>
         public static IServiceCollection AddAppServices(this IServiceCollection services)
         {
             services.AddScoped<IRoleService, RoleService>();
@@ -23,21 +30,15 @@ namespace FinalBlog.App.Utils.Extensions
             services.AddScoped<IPostService, PostService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<ITagService, TagService>();
+            services.AddScoped<ICheckDataService, CheckDataService>();
 
             return services;
         }
 
-        public static IServiceCollection AddControllerModules(this IServiceCollection services)
-        {
-            services.AddScoped<IUserControllerModule, UserControllerModule>();
-            services.AddScoped<IRoleControllerModule, RoleControllerModule>();
-            services.AddScoped<IPostControllerModule, PostControllerModule>();
-            services.AddScoped<ITagControllerModule, TagControllerModule>();
-
-            return services;
-        }
-
-        public static IServiceCollection AddCustomRepository<TEntity, TRepoitory>(this IServiceCollection services)
+        /// <summary>
+        /// Добавление кастомных репозиториев в сервисы
+        /// </summary>
+        public static IServiceCollection AddCustomRepository<TEntity, TRepoitory>(this IServiceCollection services) 
             where TEntity : class
             where TRepoitory : Repository<TEntity>
         {

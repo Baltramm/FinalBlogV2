@@ -1,4 +1,4 @@
-﻿@model FinalBlog.Services.ViewModels.Posts.Request.PostsViewModel
+﻿@model FinalBlog.Services.ViewModels.Posts.Response.PostsViewModel
 @{
     ViewData["Title"] = "Список статей";
 
@@ -19,7 +19,7 @@
         <div class="card m-3 col-10">
             <div class="card-body">
                 <a class="fs-5 mb-0 link-primary text-decoration-none" asp-action="View"
-               asp-controller="Post" asp-route-id="@post.Id" asp-route-userId="@claimUserId">
+               asp-controller="Post" asp-route-id="@post.Id">
                     @post.Title
                 </a>
                 <div class="mb-4">
@@ -37,12 +37,12 @@
                         <div class="col-sm-8" >
                             <form method="post" asp-action="Remove" asp-controller="Post" asp-route-id="@post.Id" >
                             <input type="hidden" name="userId" value="@claimUserId" />
-        <div class="btn-group">
-            <a class="btn btn-outline-success btn-sm" asp-action="Edit" asp-controller="Post" asp-route-id="@post.Id" asp-route-userId="@claimUserId">
-                Редактировать
-            </a>
-            <button type="submit" class="btn btn-outline-danger btn-sm">Удалить</button>
-        </div>
+                                <div class="btn-group">
+                                    <a class="btn btn-outline-success btn-sm" asp-action="Edit" asp-controller="Post" asp-route-id="@post.Id">
+                                        Редактировать
+                                    </a>
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Удалить</button>
+                                </div>
                             </form>
                         </div>
                     }

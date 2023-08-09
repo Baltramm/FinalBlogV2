@@ -3,6 +3,9 @@ using FinalBlog.Data.DBModels.Tags;
 
 namespace FinalBlog.Data.Repositories
 {
+    /// <summary>
+    /// Репозиторий тегов
+    /// </summary>
     public class TagRepository : Repository<Tag>
     {
         public TagRepository(FinalBlogContext context) : base(context) { }
@@ -10,12 +13,18 @@ namespace FinalBlog.Data.Repositories
         public async override Task<List<Tag>> GetAllAsync() =>
             await Set.Include(t => t.Posts).ToListAsync();
 
-        public override async Task<Tag?> GetAsync(int id) =>
+        public override async Task<Tag?> GetAsync(int id) => 
             await Set.Include(t => t.Posts).FirstOrDefaultAsync(t => t.Id == id);
 
-        public async Task<Tag?> GetTagByNameAsync(string name) =>
+        /// <summary>
+        /// Получение тега по его названию
+        /// </summary>
+        public async Task<Tag?> GetTagByNameAsync(string name) => 
             await Set.Include(t => t.Posts).FirstOrDefaultAsync(t => t.Name == name);
 
+        /// <summary>
+        /// Получение списка тегов для указанной статьи
+        /// </summary>
         public async Task<List<Tag>> GetTagsByPostIdAsync(int postId) =>
             await Set.Include(t => t.Posts)
             .SelectMany(t => t.Posts, (t, p) => new { Tag = t, PostId = p.Id })

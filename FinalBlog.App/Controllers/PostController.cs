@@ -1,29 +1,36 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FinalBlog.App.Utils.Attributes;
-using FinalBlog.App.Utils.Modules.Interfaces;
 using FinalBlog.Services.Services.Interfaces;
-using FinalBlog.Services.ViewModels.Posts.Response;
+using FinalBlog.Services.ViewModels.Posts.Request;
 
 namespace FinalBlog.App.Controllers
 {
-    [Authorize, CheckUserId]
+    /// <summary>
+    /// Контроллер статей
+    /// </summary>
+    
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class PostController : Controller
     {
         private readonly IPostService _postService;
         private readonly ITagService _tagService;
         private readonly ICommentService _commentService;
-        private readonly IPostControllerModule _module;
+        private readonly ICheckDataService _checkDataService;
 
-        public PostController(IPostService postService, ITagService tagService, ICommentService commentService, IPostControllerModule module)
+        public PostController(IPostService postService, ITagService tagService, ICommentService commentService, ICheckDataService checkDataService)
         {
             _postService = postService;
             _tagService = tagService;
             _commentService = commentService;
-            _module = module;
+            _checkDataService = checkDataService;
         }
 
+        /// <summary>
+        /// Страница создания статьи
+        /// </summary>
         [HttpGet]
+        [Authorize, CheckUserId]
         [Route("CreatePost")]
         public async Task<IActionResult> Create()
         {
@@ -31,79 +38,107 @@ namespace FinalBlog.App.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// Создание статьи
+        /// </summary>
         [HttpPost]
+        [Authorize, CheckUserId]
         [Route("CreatePost")]
         public async Task<IActionResult> Create(PostCreateViewModel model)
         {
-            var tags = await _tagService.SetTagsForPostAsync(model.PostTags);
-
-            var result = await _postService.CreatePostAsync(model, tags);
-            if (!result)
+            if (ModelState.IsValid)
             {
-                ModelState.AddModelError(string.Empty, "Не удалось создать статью!");
-                return View(model);
+                var result = await _postService.CreatePostAsync(model);
+
+                if (result)
+                    return RedirectToAction("View", new { Id = await _postService.GetLastCreatePostIdByUserId(model.UserId), model.UserId });
+                else
+                    ModelState.AddModelError(string.Empty, "Ошибка! Не удалось создать статью!");
             }
-            return RedirectToAction("View", new { Id = await _postService.GetLastCreatePostIdByUserId(model.UserId), model.UserId });
+
+            model.AllTags ??= await _tagService.GetAllTagsAsync();
+            return View(model);
         }
 
+        /// <summary>
+        /// Страница всех статей (получения статей, имеющих указанный тег)
+        /// </summary>
         [HttpGet]
         [Route("GetPosts/{tagId?}")]
-        public async Task<IActionResult> GetPosts([FromRoute] int? tagId, [FromQuery] int? userId)
+        public async Task<IActionResult> GetPosts([FromRoute]int? tagId, [FromQuery] int? userId)
         {
             var model = await _postService.GetPostsViewModelAsync(tagId, userId);
             return View(model);
         }
 
+        /// <summary>
+        /// Удаление статьи
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Remove([FromRoute] int id, [FromForm] int userId)
         {
             var access = User.IsInRole("Admin") || User.IsInRole("Moderator");
-            var result = await _postService.DeletePostAsync(id, userId, access);
+            var (result, isDeleted) = await _postService.DeletePostAsync(id, userId, access);
 
-            if (!result) return BadRequest();
-
-            return RedirectToAction("GetPosts");
+            if (isDeleted) 
+                return RedirectToAction("GetPosts");
+            else 
+                return result!;
         }
 
+        /// <summary>
+        /// Страница редактирования статьи
+        /// </summary>
         [HttpGet]
-        public async Task<IActionResult> Edit([FromRoute] int id, [FromQuery] int? userId)
+        public async Task<IActionResult> Edit([FromRoute] int id)
         {
-            var access = User.IsInRole("Admin") || User.IsInRole("Moderator");
-            var model = await _postService.GetPostEditViewModelAsync(id, userId, access);
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "UserID")?.Value;
+            var fullAccess = User.IsInRole("Admin") || User.IsInRole("Moderator");
 
-            if (model == null) return BadRequest();
+            var (model, result) = await _postService.GetPostEditViewModelAsync(id, userId, fullAccess);
+
+            if (model == null) return result!;
 
             model.AllTags = await _tagService.GetAllTagsAsync();
-
             return View(model);
         }
 
+        /// <summary>
+        /// Редактирование статьи
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Edit(PostEditViewModel model)
         {
-            var currentPost = await _module.CheckDataAtUpdateAsync(this, model);
+            await _checkDataService.CheckDataForUpdatePostAsync(this, model);
             if (ModelState.IsValid)
             {
-                var result = await _postService.UpdatePostAsync(model, currentPost!);
-                if (!result)
-                    return BadRequest();
-
-                if (model.ReturnUrl != null && Url.IsLocalUrl(model.ReturnUrl))
-                    return Redirect(model.ReturnUrl);
-                return RedirectToAction("GetPosts");
+                var result = await _postService.UpdatePostAsync(model);
+                if (result)
+                {
+                    if (model.ReturnUrl != null && Url.IsLocalUrl(model.ReturnUrl))
+                        return Redirect(model.ReturnUrl);
+                    return RedirectToAction("GetPosts");
+                }
+                else
+                    ModelState.AddModelError(string.Empty, $"Ошибка! Не удалось обновить статью!");                
             }
 
-            model.AllTags = await _tagService.GetAllTagsAsync();
+            model.AllTags ??= await _tagService.GetAllTagsAsync();
             return View(model);
         }
 
+        /// <summary>
+        /// Страница отображения указанной статьи
+        /// </summary>
         [HttpGet]
+        [Authorize, CheckUserId]
         [Route("ViewPost/{id}")]
-        public async Task<IActionResult> View([FromRoute] int id, [FromQuery] string userId)
+        public async Task<IActionResult> View([FromRoute] int id)
         {
-            var model = await _postService.GetPostViewModelAsync(id, userId);
-            if (model == null)
-                return BadRequest();
+            var userId = User.Claims.FirstOrDefault(c => c.Type == "UserID")?.Value;
+            var model = await _postService.GetPostViewModelAsync(id, userId ?? string.Empty);
+
+            if(model == null) return NotFound();
 
             model.Comments = await _commentService.GetAllCommentsByPostIdAsync(id);
             return View(model);

@@ -2,8 +2,8 @@
 using FinalBlog.Services.Extensions;
 using FinalBlog.Services.Services.Interfaces;
 using FinalBlog.Services.ViewModels.Tags.Interfaces;
-using FinalBlog.Services.ViewModels.Tags.Request;
 using FinalBlog.Services.ViewModels.Tags.Response;
+using FinalBlog.Services.ViewModels.Tags.Request;
 using FinalBlog.Data.DBModels.Tags;
 using FinalBlog.Data.Repositories;
 using FinalBlog.Data.Repositories.Interfaces;
@@ -11,6 +11,9 @@ using System.Text.RegularExpressions;
 
 namespace FinalBlog.Services.Services
 {
+    /// <summary>
+    /// Сервисы сущности тега
+    /// </summary>
     public class TagService : ITagService
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -34,7 +37,7 @@ namespace FinalBlog.Services.Services
         {
             var model = new TagsViewModel();
 
-            if (tagId == null)
+            if(tagId == null)
             {
                 model.Tags = postId == null
                     ? await _tagRepository.GetAllAsync()
@@ -61,25 +64,29 @@ namespace FinalBlog.Services.Services
 
         public async Task<Tag?> GetTagByNameAsync(string name) => await _tagRepository.GetTagByNameAsync(name);
 
+        public async Task<List<Tag>?> GetTagByPostAsync(int postId) => await _tagRepository.GetTagsByPostIdAsync(postId);
+
         public async Task<bool> CreateTagAsync(TagCreateViewModel model)
         {
             var tag = _mapper.Map<Tag>(model);
 
-            if (await _tagRepository.CreateAsync(tag) == 0) return false;
+            if(await _tagRepository.CreateAsync(tag) == 0) return false;
             return true;
         }
 
-        public async Task<List<Tag>?> SetTagsForPostAsync(string? postTags)
+        public async Task<List<Tag>> SetTagsForPostAsync(string? postTags)
         {
-            if (postTags == null) return null;
-
-            var tagSet = Regex.Replace(postTags, @"\s+", " ").Trim().Split(" ");
-
             var tags = new List<Tag>();
-            foreach (var tagName in tagSet)
+
+            if (postTags != null)
             {
-                var tag = await GetTagByNameAsync(tagName);
-                if (tag != null) tags.Add(tag);
+                var tagSet = Regex.Replace(postTags, @"\s+", " ").Trim().Split(" ");
+
+                foreach (var tagName in tagSet)
+                {
+                    var tag = await GetTagByNameAsync(tagName);
+                    if (tag != null) tags.Add(tag);
+                }
             }
 
             return tags;
@@ -88,11 +95,11 @@ namespace FinalBlog.Services.Services
         public async Task<bool> UpdateTagAsync(TagEditViewModel model)
         {
             var currentTag = await GetTagByIdAsync(model.Id);
-            if (currentTag == null)
+            if(currentTag == null)
                 return false;
 
             currentTag.Convert(model);
-            if (await _tagRepository.UpdateAsync(currentTag) == 0) return false;
+            if(await _tagRepository.UpdateAsync(currentTag) == 0) return false;
             return true;
         }
 
@@ -101,7 +108,7 @@ namespace FinalBlog.Services.Services
             var currentTag = await GetTagByIdAsync(id);
             if (currentTag == null) return false;
 
-            if (await _tagRepository.DeleteAsync(currentTag) == 0) return false;
+            if(await _tagRepository.DeleteAsync(currentTag) == 0) return false;
             return true;
         }
 

@@ -3,6 +3,9 @@ using FinalBlog.Data.Repositories.Interfaces;
 
 namespace FinalBlog.Data.Repositories
 {
+    /// <summary>
+    /// Базовый класс для кастомных репозиториев
+    /// </summary>
     public class Repository<T> : IRepository<T> where T : class
     {
         protected DbContext _dbContext;

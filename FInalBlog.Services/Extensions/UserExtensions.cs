@@ -1,11 +1,18 @@
-﻿using FinalBlog.Services.ViewModels.Users.Response;
+﻿using FinalBlog.Services.ViewModels.Users.Request;
 using FinalBlog.Data.DBModels.Users;
+using FinalBlog.Services.ViewModels.Users.Intefaces;
 
 namespace FinalBlog.Services.Extensions
 {
+    /// <summary>
+    /// Расширения пользователя
+    /// </summary>
     public static class UserExtensions
     {
-        public static User Convert(this User user, UserEditViewModel model)
+        /// <summary>
+        /// Присвоение значений модели редактирования сущности пользователя
+        /// </summary>
+        public static User Convert(this User user, IUserUpdateModel model)
         {
             user.FirstName = model.FirstName;
             user.SecondName = model.SecondName;
@@ -16,6 +23,6 @@ namespace FinalBlog.Services.Extensions
             user.Photo = model.Photo;
 
             return user;
-        }
+        } 
     }
 }

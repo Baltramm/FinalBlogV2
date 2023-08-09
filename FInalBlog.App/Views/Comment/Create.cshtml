@@ -1,4 +1,4 @@
-﻿@model FinalBlog.Services.ViewModels.Comments.Response.CommentCreateViewModel
+﻿@model FinalBlog.Services.ViewModels.Comments.Request.CommentCreateViewModel
 @{
     var claimUserId = User.Claims.FirstOrDefault(c => c.Type == "UserID")?.Value;
 }
@@ -8,8 +8,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.11/jquery.validate.unobtrusive.js"></script>
 
 <form method="post" asp-action="Create" asp-controller="Comment">
-    <input type="hidden" asp-for="PostId" />
-    <input type="hidden" asp-for="UserId" value="@claimUserId" />
+    <div asp-validation-summary="ModelOnly" class="text-danger fs-6"></div>
+
+    <input type="hidden" asp-for="PostId"/>
+    <input type="hidden" asp-for="UserId" value="@claimUserId"/>
 
     <div class="form-group">
         <div class="row mb-3">

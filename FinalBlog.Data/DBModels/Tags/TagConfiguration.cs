@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinalBlog.Data.DBModels.Tags
 {
+    /// <summary>
+    /// Конфигурация для таблицы тега
+    /// </summary>
     public class TagConfiguration : IEntityTypeConfiguration<Tag>
     {
         public void Configure(EntityTypeBuilder<Tag> builder)

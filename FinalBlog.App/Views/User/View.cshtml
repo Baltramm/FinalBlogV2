@@ -1,4 +1,4 @@
-﻿@model FinalBlog.Services.ViewModels.Users.Request.UserViewModel;
+﻿@model FinalBlog.Services.ViewModels.Users.Response.UserViewModel;
 @{
     ViewData["Title"] = "Пользователь";
 
@@ -44,18 +44,18 @@
                         @if (User.IsInRole("Admin") || (!User.IsInRole("Admin") && Model.Id.ToString() == claimUserId))
                         {
                             <div class="col mt-4 mb-2 justify-content-end">
-        <a class="btn btn-outline-primary" asp-action="Edit" asp-controller="User" asp-route-userId="@claimUserId"
-            asp-route-id="@Model.Id" asp-route-returnUrl="@Context.Request.Path">
-            Редактировать
-        </a>
+                                <a class="btn btn-outline-primary" asp-action="Edit" asp-controller="User"
+                                    asp-route-id="@Model.Id" asp-route-returnUrl="@Context.Request.Path">
+                                    Редактировать
+                                </a>
                             </div>
                             <div class="col mt-4 d-flex justify-content-sm-end justify-content-start">
-        <form method="post" asp-action="Remove" asp-controller="User">
-            <input type="hidden" name="id" value="@Model.Id" />
-            <input type="hidden" name="userId" value="@claimUserId" />
+                                <form method="post" asp-action="Remove" asp-controller="User">
+                                    <input type="hidden" name="id" value="@Model.Id" />
+                                    <input type="hidden" name="userId" value="@claimUserId" />
 
-            <button type="submit" class="btn btn-outline-danger">Удалить</button>
-        </form>
+                                    <button type="submit" class="btn btn-outline-danger">Удалить</button>
+                                </form>
                             </div>
                         }
                     </div>

@@ -3,6 +3,9 @@ using NLog;
 
 namespace FinalBlog.App.Utils.Middlewares
 {
+    /// <summary>
+    /// Промежуточное ПО для логирования действий пользователя
+    /// </summary>
     public class FollowLoggingMiddleware
     {
         private readonly RequestDelegate _next;
@@ -17,7 +20,9 @@ namespace FinalBlog.App.Utils.Middlewares
         public async Task InvokeAsync(HttpContext context)
         {
             var path = context.Request.GetEncodedUrl();
-            _logger.Info(path);
+            var userName = context.Session.GetString("username") ?? "_";
+
+            _logger.Info($"{userName} => {path}");
 
             await _next.Invoke(context);
         }

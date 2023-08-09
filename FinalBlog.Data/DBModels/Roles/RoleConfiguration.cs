@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinalBlog.Data.DBModels.Roles
 {
+    /// <summary>
+    /// Конфигурация для таблицы ролей
+    /// </summary>
     public class RoleConfiguration : IEntityTypeConfiguration<Role>
     {
         public void Configure(EntityTypeBuilder<Role> builder)

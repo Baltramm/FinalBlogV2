@@ -2,6 +2,9 @@
 
 namespace FinalBlog.Data.DBModels.Tags
 {
+    /// <summary>
+    /// Сущность тега
+    /// </summary>
     public class Tag
     {
         public int Id { get; set; }
@@ -11,7 +14,7 @@ namespace FinalBlog.Data.DBModels.Tags
 
         public Tag() { }
 
-        public Tag(string name)
+        public Tag(string name) 
         {
             Name = name;
         }

@@ -2,6 +2,9 @@
 
 namespace FinalBlog.App.Utils.Middlewares
 {
+    /// <summary>
+    /// Промежуточное ПО для обработки и логирования исключений
+    /// </summary>
     public class ExceptionHandlerMiddleware
     {
         private readonly RequestDelegate _next;

@@ -1,4 +1,4 @@
-﻿@model FinalBlog.Services.ViewModels.Posts.Request.PostViewModel
+﻿@model FinalBlog.Services.ViewModels.Posts.Response.PostViewModel
 @{
     ViewData["Title"] = "Статья";
 
@@ -18,7 +18,7 @@
         <div class="col d-flex align-items-center justify-content-end">
             @if (checkRole || (!checkRole && claimUserId == Model.User.Id.ToString()))
             {
-                <a class="btn btn-outline-primary btn-sm m-0" asp-action="Edit" asp-controller="Post" asp-route-id="@Model.Id" asp-route-userId="@claimUserId"
+                <a class="btn btn-outline-primary btn-sm m-0" asp-action="Edit" asp-controller="Post" asp-route-id="@Model.Id"
                     asp-route-returnUrl="@Context.Request.Path">
                     Редактировать
                 </a>
@@ -54,18 +54,18 @@
                         @if (checkRole || (!checkRole && claimUserId == comment.UserId.ToString()))
                         {
                             <div class="col-sm-8">
-        <form method="post" asp-action="Remove" asp-controller="Comment" asp-route-id="@comment.Id">
-            <input type="hidden" name="userId" value="@claimUserId" />
-            <input type="hidden" value="@Context.Request.Path" name="returnUrl" />
+                                <form method="post" asp-action="Remove" asp-controller="Comment" asp-route-id="@comment.Id">
+                                    <input type="hidden" name="userId" value="@claimUserId" />
+                                    <input type="hidden" value="@Context.Request.Path" name="returnUrl" />
 
-            <div class="btn-group">
-                <a class="btn btn-outline-success btn-sm" onclick="setScrollPos()" asp-action="Edit" asp-controller="Comment" asp-route-id="@comment.Id"
-                    asp-route-returnUrl="@Context.Request.Path" asp-route-userId="@claimUserId">
-                    Редактировать
-                </a>
-                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="setScrollPos()">Удалить</button>
-            </div>
-        </form>
+                                    <div class="btn-group">
+                                        <a class="btn btn-outline-success btn-sm" onclick="setScrollPos()" asp-action="Edit" asp-controller="Comment" asp-route-id="@comment.Id"
+                                            asp-route-returnUrl="@Context.Request.Path">
+                                            Редактировать
+                                        </a>
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" onclick="setScrollPos()">Удалить</button>
+                                    </div>
+                                </form>
                             </div>
                         }
                     </div>

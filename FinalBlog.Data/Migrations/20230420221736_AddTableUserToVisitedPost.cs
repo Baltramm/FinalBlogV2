@@ -4,8 +4,10 @@
 
 namespace FinalBlog.Data.Migrations
 {
+    /// <inheritdoc />
     public partial class AddTableUserToVisitedPost : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
@@ -42,6 +44,7 @@ namespace FinalBlog.Data.Migrations
                 column: "VisitedPostsId");
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

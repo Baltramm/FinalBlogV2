@@ -4,11 +4,16 @@ using FinalBlog.Data.DBModels.Comments;
 using FinalBlog.Services.Extensions;
 using FinalBlog.Data.Repositories;
 using FinalBlog.Data.Repositories.Interfaces;
-using FinalBlog.Services.ViewModels.Comments.Response;
 using FinalBlog.Services.ViewModels.Comments.Request;
+using FinalBlog.Services.ViewModels.Comments.Response;
+using Microsoft.AspNetCore.Mvc;
+using FinalBlog.Services.ViewModels.Comments.Interfaces;
 
 namespace FinalBlog.Services.Services
 {
+    /// <summary>
+    /// Сервисы сущности комментария
+    /// </summary>
     public class CommentService : ICommentService
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -40,7 +45,7 @@ namespace FinalBlog.Services.Services
             comment.Post = post;
             comment.User = user;
 
-            if (await _commentRepository.CreateAsync(comment) == 0) return false;
+            if(await _commentRepository.CreateAsync(comment) == 0) return false;
             return true;
         }
 
@@ -57,45 +62,51 @@ namespace FinalBlog.Services.Services
             else
                 model.Comments = (await _commentRepository.GetCommentsByPostIdAsync((int)postId!))
                     .Where(c => c.UserId == (int)userId!).ToList();
-
+            
             return model;
         }
+
+        public async Task<List<Comment>> GetAllComments() => await _commentRepository.GetAllAsync();
 
         public async Task<Comment?> GetCommentByIdAsync(int id) => await _commentRepository.GetAsync(id);
 
-        public async Task<bool> DeleteCommentAsync(int id, int? userId, bool fullAccess)
+        public async Task<(IActionResult?, bool)> DeleteCommentAsync(int id, int? userId, bool fullAccess)
         {
             var deletedComment = await GetCommentByIdAsync(id);
-            var check = fullAccess
-                ? deletedComment != null
-                : deletedComment != null && deletedComment.UserId == userId;
+            if (deletedComment == null) return (new NotFoundResult(), false);
 
-            if (!check) return false;
+            if(fullAccess || deletedComment.UserId == userId)
+            {
+                if (await _commentRepository.DeleteAsync(deletedComment!) == 0)
+                    return (new BadRequestResult(), false);
 
-            if (await _commentRepository.DeleteAsync(deletedComment!) == 0) return false;
-            return true;
+                return (null, true);
+            }
+            
+            return (new ForbidResult(), false);
         }
 
-        public async Task<CommentEditViewModel?> GetCommentEditViewModelAsync(int id, int? userId, bool fullAccess)
+        public async Task<int> DeleteCommentAsync(Comment comment) => await _commentRepository.DeleteAsync(comment);
+
+        public async Task<(CommentEditViewModel?, IActionResult?)> GetCommentEditViewModelAsync(int id, string? userId, bool fullAccess)
         {
             var comment = await GetCommentByIdAsync(id);
-            var check = fullAccess
-                ? comment != null
-                : comment != null && comment.UserId == userId;
+            if (comment == null) return (null, new NotFoundResult());
 
-            var model = !check ? null : _mapper.Map<CommentEditViewModel>(comment);
+            if (fullAccess || comment.UserId.ToString() == userId)
+                return (_mapper.Map<CommentEditViewModel>(comment), null);
 
-            return model;
+            return (null, new ForbidResult());
         }
 
-        public async Task<bool> UpdateCommentAsync(CommentEditViewModel model)
+        public async Task<bool> UpdateCommentAsync(ICommentEditModel model)
         {
             var currentComment = await GetCommentByIdAsync(model.Id);
             if (currentComment == null)
                 return false;
 
             currentComment.Convert(model);
-            if (await _commentRepository.UpdateAsync(currentComment) == 0) return false;
+            if(await _commentRepository.UpdateAsync(currentComment) == 0) return false;
             return true;
         }
 

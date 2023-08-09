@@ -1,0 +1,18 @@
+﻿using FinalBlog.Services.ViewModels.Attributes;
+using System.ComponentModel.DataAnnotations;
+
+namespace FinalBlog.Services.ViewModels.Comments.Request
+{
+    /// <summary>
+    /// Модель представления создания комментария
+    /// </summary>
+    public class CommentCreateViewModel
+    {
+        public int UserId { get; set; }
+        public int PostId { get; set; }
+
+        [Required(ErrorMessage = "Добавьте текст комментария!")]
+        [Display(Name = "Комментарий")]
+        public string Text { get; set; }
+    }
+}

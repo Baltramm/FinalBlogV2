@@ -10,6 +10,7 @@ using System.Reflection;
 using FinalBlog.Data.DBModels.Roles;
 using FinalBlog.Services;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Identity;
 
 namespace FinalBlog.App
 {
@@ -18,7 +19,7 @@ namespace FinalBlog.App
         static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            builder.WebHost.UseStaticWebAssets();
             builder.Services.AddControllersWithViews();
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -28,13 +29,12 @@ namespace FinalBlog.App
                 .AddCustomRepository<Comment, CommentRepository>()
                 .AddCustomRepository<Tag, TagRepository>()
                 .AddAppServices()
-                .AddControllerModules();
+                .AddSession();
 
             var assembly = Assembly.GetAssembly(typeof(MapperProfile));
             builder.Services.AddAutoMapper(assembly);
 
-            builder.Services.AddIdentity<User, Role>(cfg =>
-            {
+            builder.Services.AddIdentity<User, Role>(cfg => {
                 cfg.Password.RequiredLength = 8;
                 cfg.Password.RequireNonAlphanumeric = false;
                 cfg.Password.RequireUppercase = false;
@@ -51,9 +51,10 @@ namespace FinalBlog.App
             builder.Services.AddAuthorization();
 
             var app = builder.Build();
-
+            app.UseSession();
             app.UseCustomExceptionHandler();
             app.UseFollowLogging();
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 

@@ -6,10 +6,15 @@
 {
     <ul class="navbar-nav flex-grow-1">
         <li class="nav-item">
+            <a class="nav-link" asp-action="GetPosts" asp-controller="Post">Статьи</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" asp-action="GetTags" asp-controller="Tag">Теги</a>
         </li>
+
         @if(User.IsInRole("Admin") || User.IsInRole("Moderator"))
         {
+
             <li class="nav-item">
                 <a class="nav-link" asp-action="GetComments" asp-controller="Comment">Комментарии</a>
             </li>
@@ -40,7 +45,7 @@
                 </li>
                 <li>
                     <a class="dropdown-item" href="#" onclick="document.getElementById('logout').submit()">Выход</a>
-                    <form id="logout" method="post" asp-controller="User" asp-action="Logout" 
+                    <form id="logout" method="post" asp-controller="User" asp-action="Logout"
                         asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)"></form>
                 </li>
             </ul>
@@ -48,8 +53,16 @@
     </ul>    
 }
 else
-{
+{<ul class="navbar-nav flex-grow-1">
+        <li class="nav-item">
+            <a class="nav-link" asp-action="GetPosts" asp-controller="Post">Статьи</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" asp-action="GetTags" asp-controller="Tag">Теги</a>
+        </li>
+ </ul>
     <ul class="navbar-nav flex-grow-1 justify-content-end">
+        
         @if (!Context.Request.Path.StartsWithSegments("/Register"))
         {
             <li class="nav-item">
@@ -63,4 +76,5 @@ else
             </li>
         }        
     </ul>
+    
 }

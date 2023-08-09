@@ -3,13 +3,16 @@ using FinalBlog.Data.Repositories.Interfaces;
 
 namespace FinalBlog.Data.Repositories
 {
+    /// <summary>
+    /// Класс для получения указанного кастомного репозитория
+    /// </summary>
     public class UnitOfWork : IUnitOfWork
     {
         private readonly FinalBlogContext _context;
         private Dictionary<Type, object>? _repositories;
         private bool isDisposed = false;
 
-        public UnitOfWork(FinalBlogContext context)
+        public UnitOfWork(FinalBlogContext context) 
         {
             _context = context;
         }
@@ -17,7 +20,7 @@ namespace FinalBlog.Data.Repositories
         public IRepository<TEntity> GetRepository<TEntity>(bool hasCustomRepository = true)
             where TEntity : class
         {
-            if (_repositories == null)
+            if(_repositories == null)
                 _repositories = new Dictionary<Type, object>();
 
             if (hasCustomRepository)
@@ -43,12 +46,12 @@ namespace FinalBlog.Data.Repositories
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing) 
         {
-            if (isDisposed)
+            if(isDisposed)
                 return;
 
-            if (disposing)
+            if(disposing)
                 _context.Dispose();
 
             isDisposed = true;

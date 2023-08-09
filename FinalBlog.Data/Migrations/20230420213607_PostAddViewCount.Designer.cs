@@ -14,7 +14,8 @@ namespace FinalBlog.Data.Migrations
     [Migration("20230420213607_PostAddViewCount")]
     partial class PostAddViewCount
     {
-                protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.4");

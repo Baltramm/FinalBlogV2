@@ -3,10 +3,13 @@ using FinalBlog.Data.DBModels.Posts;
 
 namespace FinalBlog.Data.DBModels.Comments
 {
+    /// <summary>
+    /// Сущность комментария
+    /// </summary>
     public class Comment
     {
         public int Id { get; set; }
-        public string Text { get; set; }
+        public string Text { get; set; }        
         public DateTime CreatedDate { get; set; }
 
         public int UserId { get; set; }

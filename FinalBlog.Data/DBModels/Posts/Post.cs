@@ -4,6 +4,9 @@ using FinalBlog.Data.DBModels.Users;
 
 namespace FinalBlog.Data.DBModels.Posts
 {
+    /// <summary>
+    /// Сущность статьи
+    /// </summary>
     public class Post
     {
         public int Id { get; set; }

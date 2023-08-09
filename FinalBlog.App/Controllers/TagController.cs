@@ -1,48 +1,60 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using FinalBlog.App.Utils.Attributes;
-using FinalBlog.App.Utils.Modules.Interfaces;
 using FinalBlog.Services.Services.Interfaces;
-using FinalBlog.Services.ViewModels.Tags.Response;
+using FinalBlog.Services.ViewModels.Tags.Request;
 
 namespace FinalBlog.App.Controllers
 {
-    [CheckUserId]
+    /// <summary>
+    /// Контроллер тегов
+    /// </summary>
+   
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class TagController : Controller
     {
         private readonly ITagService _tagService;
-        private readonly ITagControllerModule _module;
+        private readonly ICheckDataService _checkDataService;
 
-        public TagController(ITagService tagService, ITagControllerModule module)
+        public TagController(ITagService tagService, ICheckDataService checkDataService)
         {
             _tagService = tagService;
-            _module = module;
+            _checkDataService = checkDataService;
         }
 
+        /// <summary>
+        /// Страница создания тега
+        /// </summary>
         [Authorize]
         [HttpGet]
         [Route("CreateTag")]
         public IActionResult Create() => View();
 
+        /// <summary>
+        /// Создание тега
+        /// </summary>
         [Authorize]
         [HttpPost]
         [Route("CreateTag")]
         public async Task<IActionResult> Create(TagCreateViewModel model)
         {
-            _ = await _module.CheckTagNameAsync(this, model);
+            await _checkDataService.CheckTagNameAsync(this, model);
             if (ModelState.IsValid)
             {
                 var result = await _tagService.CreateTagAsync(model);
-                if (!result)
-                    return BadRequest();
-
-                return RedirectToAction("GetTags");
+                if (result)
+                    return RedirectToAction("GetTags");
+                else
+                    ModelState.AddModelError(string.Empty, $"Ошибка! Не удалось создать тег!");
             }
-            else
-                return View(model);
+            
+            return View(model);
         }
 
-        [Authorize]
+        /// <summary>
+        /// Страница всех тегов (получение тегов для указанной статьи, получение указанного тега)
+        /// </summary>
+        
         [HttpGet]
         [Route("GetTags/{id?}")]
         public async Task<IActionResult> GetTags([FromRoute] int? id, [FromQuery] int? postId)
@@ -51,52 +63,61 @@ namespace FinalBlog.App.Controllers
             return View(model);
         }
 
+        /// <summary>
+        /// Страница редактирования тега
+        /// </summary>
         [Authorize(Roles = "Admin, Moderator")]
         [HttpGet]
         public async Task<IActionResult> Edit([FromRoute] int id)
         {
             var model = await _tagService.GetTagEditViewModelAsync(id);
-            if (model == null)
-                return BadRequest();
+            if (model == null) return NotFound();
 
             return View(model);
         }
 
+        /// <summary>
+        /// Редактирование тега
+        /// </summary>
         [Authorize(Roles = "Admin, Moderator")]
         [HttpPost]
         public async Task<IActionResult> Edit(TagEditViewModel model)
         {
-            _ = await _module.CheckTagNameAsync(this, model);
+            await _checkDataService.CheckTagNameAsync(this, model);
             if (ModelState.IsValid)
             {
                 var result = await _tagService.UpdateTagAsync(model);
-                if (!result)
-                    return BadRequest();
-
-                return RedirectToAction("GetTags");
+                if (result)
+                    return RedirectToAction("GetTags");
+                else
+                    ModelState.AddModelError(string.Empty, $"Ошибка! Не удалось обновить тег!");
             }
-            else
-                return View(model);
+            
+            return View(model);
         }
 
+        /// <summary>
+        /// Удаление тега
+        /// </summary>
         [Authorize(Roles = "Admin, Moderator")]
         [HttpPost]
         public async Task<IActionResult> Remove(int id)
         {
             var reselt = await _tagService.DeleteTagAsync(id);
-            if (!reselt)
-                return BadRequest();
+            if(!reselt) return BadRequest();
 
             return RedirectToAction("GetTags");
         }
 
+        /// <summary>
+        /// Страница отображения указанного тега
+        /// </summary>
         [Authorize(Roles = "Admin, Moderator")]
         [HttpGet]
-        public async Task<IActionResult> View([FromRoute] int id)
+        public async Task<IActionResult> View([FromRoute]int id)
         {
             var model = await _tagService.GetTagViewModelAsync(id);
-            if (model == null)
-                return BadRequest();
+            if(model == null) return NotFound();
 
             return View(model);
         }
